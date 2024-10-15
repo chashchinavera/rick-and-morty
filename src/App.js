@@ -269,7 +269,7 @@ const App = () => {
             {filteredPersons?.map((el) => (
               <Link
                 key={el.id}
-                to={"/" + el.id}
+                to={"/rick-and-morty/" + el.id}
                 className="hover:opacity-70 flex flex-col lg:grid lg:grid-cols-4 lg:text-center border-[1px] border-white border-solid rounded-[10px] lg:h-[70px] hover:min-h-[70px] hover:h-auto px-[10px] mt-[15px]"
               >
                 <p className="text-[20px]">{el.name}</p>

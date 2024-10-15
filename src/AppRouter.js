@@ -5,8 +5,8 @@ import Person from "./Person";
 const AppRouter = () => {
   return (
     <Routes>
-        <Route path="/" element={<App />} />
-        <Route path="/:id" element={<Person />} />
+        <Route path="rick-and-morty/" element={<App />} />
+        <Route path="rick-and-morty/:id" element={<Person />} />
     </Routes>
   );
 };
