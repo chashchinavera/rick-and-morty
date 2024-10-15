@@ -1,4 +1,4 @@
-import { json, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 
 const App = () => {
@@ -19,6 +19,7 @@ const App = () => {
   const [persons, setPersons] = useState([]);
   const [filteredPersons, setFilteredPersons] = useState([]);
   const request = sessionStorage.getItem("request");
+  const personsSS = sessionStorage.getItem("persons");
 
   useEffect(() => {
     const getData = async () => {
@@ -28,7 +29,10 @@ const App = () => {
     };
 
     getData().then((data) => setPersons(data));
-  }, []);
+    if (persons !== JSON.stringify(personsSS)) {
+      sessionStorage.setItem("persons", JSON.stringify(persons));
+    }
+  }, [persons]);
 
   const getEpisodes = (episodes) => {
     let data = [];
@@ -285,11 +289,11 @@ const App = () => {
               </Link>
             ))}
           </div>
-        ) : 
-        request !== null ? 
-        (
+        ) : request !== null ? (
           <p className="text-20px lg:text-[30px]">Ничего не найдено</p>
-        ) : ''}
+        ) : (
+          ""
+        )}
       </div>
     </div>
   );
