@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import NotFound from "./NotFound";
 
 const Person = () => {
@@ -54,12 +55,12 @@ const Person = () => {
               Количество эпизодов: {person?.episode.length}
             </p>
           </div>
-          <a
-            href="/rick-and-morty/"
-            className="text-[20px] md:text-[30px] mt-[100px] item-start hover:text-red-500 cursor-pointer"
+          <Link
+            to="/rick-and-morty/"
+            className="text-[20px] md:text-[30px] mt-[100px] item-start hover:text-red-500"
           >
             Назад
-          </a>
+          </Link>
         </div>
       )}
     </>
