@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { json, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 
 const App = () => {
@@ -17,7 +17,8 @@ const App = () => {
     episodes: true,
   });
   const [persons, setPersons] = useState([]);
-  const formInfo = localStorage.getItem("formInfo");
+  const [filteredPersons, setFilteredPersons] = useState([]);
+  const request = sessionStorage.getItem("request");
 
   useEffect(() => {
     const getData = async () => {
@@ -26,22 +27,8 @@ const App = () => {
       return json.results;
     };
 
-    const result = getData();
-    result.then((data) => setPersons(data));
+    getData().then((data) => setPersons(data));
   }, []);
-
-  useEffect(() => {
-    if (
-      values.name === "" &&
-      values.alive === "" &&
-      values.race === "" &&
-      values.episodes === "" &&
-      formInfo
-    ) {
-      setValues(JSON.parse(formInfo));
-    }
-    localStorage.setItem("formInfo", JSON.stringify(values));
-  }, [values, formInfo]);
 
   const getEpisodes = (episodes) => {
     let data = [];
@@ -60,6 +47,84 @@ const App = () => {
 
     return data.join(", ");
   };
+
+  function getFilteredPersons() {
+    const name = String(values.name).toLowerCase().trim();
+    const race = String(values.race).toLowerCase().trim();
+    const alive = String(values.alive).toLowerCase().trim();
+    const episodes = String(values.episodes).toLowerCase().trim(); // получили значение из формы
+
+    const filtered = persons
+      .filter((person) => {
+        if (values.name !== "") {
+          const personName = String(person.name).toLowerCase().trim();
+          const equalName = personName.indexOf(name) !== -1;
+          return equalName;
+        } else {
+          return person;
+        }
+      })
+      .filter((person) => {
+        if (values.race !== "") {
+          const personRace = String(person.species).toLowerCase();
+          const equalRace = personRace === race;
+          return equalRace;
+        } else {
+          return person;
+        }
+      })
+      .filter((person) => {
+        if (values.alive !== "") {
+          const personAlive = String(person.status).toLowerCase();
+          const equalAlive = personAlive === alive;
+          return equalAlive;
+        } else {
+          return person;
+        }
+      })
+      .filter((person) => {
+        if (values.episodes !== "") {
+          const personEpisodes = getEpisodes(person.episode).split(", "); //получили массив с эпизодами с сервера
+          const equalEpisodes = personEpisodes.includes(episodes);
+          return equalEpisodes;
+        } else {
+          return person;
+        }
+      });
+
+    if (
+      values.name === "" &&
+      values.race === "" &&
+      values.alive === "" &&
+      values.episodes === ""
+    ) {
+      return setFilteredPersons([]);
+    } else {
+      setFilteredPersons(filtered);
+    }
+  }
+
+  useEffect(() => {
+    if (
+      values.name === "" &&
+      values.episodes === "" &&
+      values.alive === "" &&
+      values.race === "" &&
+      request
+    ) {
+      setValues(JSON.parse(request));
+    }
+    if (
+      JSON.stringify(request) !== values &&
+      (values.name !== "" ||
+        values.episodes !== "" ||
+        values.alive !== "" ||
+        values.race !== "")
+    ) {
+      sessionStorage.setItem("request", JSON.stringify(values));
+    }
+    getFilteredPersons();
+  }, [values, request, persons]);
 
   const handleChange = (evt) => {
     const target = evt.target;
@@ -84,6 +149,23 @@ const App = () => {
     setIsValid(target.closest("form").checkValidity());
   };
 
+  const handleClear = () => {
+    setValues({
+      name: "",
+      alive: "",
+      race: "",
+      episodes: "",
+    });
+
+    setErrors({
+      name: "",
+      episodes: "",
+    });
+
+    sessionStorage.clear("request");
+    setFilteredPersons([]);
+  };
+
   return (
     <div className="w-[100%] min-h-[100vh] bg-black flex justify-center py-[50px] mx-auto text-white">
       <div className="max-w-[1280px] w-[90%] h-max flex flex-col border-[2px] border-white border-solid rounded-[50px] p-[50px]">
@@ -99,7 +181,7 @@ const App = () => {
               onChange={handleChange}
               autoComplete="off"
               type="text"
-              pattern="^[A-Za-z]+$"
+              pattern="^[A-Za-z ]+$"
               title="Имя может содержать только латинские буквы"
               className="mt-[20px] bg-black border-[1px] border-white border-solid rounded-[10px] h-[40px] pl-[10px]"
             />
@@ -125,8 +207,8 @@ const App = () => {
                 value={values.alive}
               >
                 <option value=""></option>
-                <option value="true">Да</option>
-                <option value="false">Нет</option>
+                <option value="Alive">Жив</option>
+                <option value="Dead">Мертв</option>
                 <option value="unknown">Неизвестно</option>
               </select>
             </label>
@@ -140,8 +222,8 @@ const App = () => {
                 value={values.race}
               >
                 <option value=""></option>
-                <option value="true">Человек</option>
-                <option value="false">Инопланетянин</option>
+                <option value="Human">Человек</option>
+                <option value="Alien">Инопланетянин</option>
               </select>
             </label>
           </div>
@@ -169,13 +251,21 @@ const App = () => {
             </span>
           </label>
         </form>
-        {persons?.length ? (
+
+        <button
+          type="reset"
+          onClick={handleClear}
+          className="cursor-pointer border-[1px] border-white border-solid rounded-[10px] min-w-[200px] self-end hover:opacity-70"
+        >
+          Очистить
+        </button>
+        {filteredPersons.length > 0 ? (
           <div className="flex flex-col">
             <h2 className="text-[30px] md:text-[40px] my-[10px]">Найдено</h2>
-            {persons?.map((el) => (
+            {filteredPersons?.map((el) => (
               <Link
                 key={el.id}
-                to={"#"}
+                to={"/" + el.id}
                 className="hover:opacity-70 flex flex-col lg:grid lg:grid-cols-4 lg:text-center border-[1px] border-white border-solid rounded-[10px] lg:h-[70px] hover:min-h-[70px] hover:h-auto px-[10px] mt-[15px]"
               >
                 <p className="text-[20px]">{el.name}</p>
@@ -187,7 +277,7 @@ const App = () => {
                     : "Неизвестно"}
                 </p>
                 <p className="text-[20px]">
-                  {el.species === "human" ? "Человек" : "Инопланетянин"}
+                  {el.species === "Human" ? "Человек" : "Инопланетянин"}
                 </p>
                 <p className="text-[20px] overflow-hidden">
                   Эпизоды с персонажем: {getEpisodes(el.episode)}
@@ -195,9 +285,11 @@ const App = () => {
               </Link>
             ))}
           </div>
-        ) : (
-          ""
-        )}
+        ) : 
+        request !== null ? 
+        (
+          <p className="text-20px lg:text-[30px]">Ничего не найдено</p>
+        ) : ''}
       </div>
     </div>
   );
