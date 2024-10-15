@@ -15,31 +15,33 @@ const Person = () => {
   }, []);
 
   const person = persons.find((item) => item.id == id);
+  
+  console.log(person);
 
   return (
     <div className="bg-black text-white w-[100%] min-h-[100vh] flex flex-col items-center py-[50px]">
-      <h1 className="text-[40px] mt-[15px]">Имя: {person.name}</h1>
+      <h1 className="text-[40px] mt-[15px]">Имя: {person?.name}</h1>
       <p className="text-[30px] mt-[15px]">
-        Жив: {person.status === "Dead" ? "Нет" : "Да"}
+        Жив: {person?.status === "Dead" ? "Нет" : "Да"}
       </p>
       <p className="text-[30px] mt-[15px]">
-        Раса:{" "}
-        {person.species === "Human"
+        Раса:
+        {person?.species === "Human"
           ? "Человек"
-          : person.species === "Alien"
+          : person?.species === "Alien"
           ? "Инопланетянин"
           : "Неизвестно"}
       </p>
       <p className="text-[30px] mt-[15px]">
-        Пол:{" "}
-        {person.gender === "Male"
+        Пол:
+        {person?.gender === "Male"
           ? "Мужской"
-          : person.gender === "Female"
+          : person?.gender === "Female"
           ? "Женский"
           : "Неизвестно"}
       </p>
       <p className="text-[30px] mt-[15px]">
-        Количество эпизодов: {person.episode.length}
+        Количество эпизодов: {person?.episode.length}
       </p>
       <a
         href="/"
